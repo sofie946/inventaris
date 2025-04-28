@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Service PHP dengan PHP-FPM
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+    networks:
+      - laravel
+
+  # Service untuk database (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel_inventaris
+      # MYSQL_USER: ""
+      # MYSQL_PASSWORD: ""
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql-db   # Ini nama service database
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"          # Mapping port 8080 host ke 80 container
+    depends_on:
+      - db
+    networks:
+      - laravel
+
+# Network untuk komunikasi antar service
+networks:
+  laravel:
+    driver: bridge
+
+# Volume untuk database persistence
+volumes:
+  db-data:
